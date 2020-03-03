@@ -1,30 +1,42 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, ScrollView, FlatList } from 'react-native';
+import { StyleSheet, View, Button, FlatList } from 'react-native';
+
+import TaskItem from './components/TaskItem.jsx';
+import TaskInput from './components/TaskInput.jsx';
 
 export default function App() {
-  const [newTask, setNewTask] = useState();
-  const [tasks, setTasks] = useState([])
+  const [ tasks, setTasks ] = useState([])
+  const [ isAddMode, setIsAddMode ] = useState(false);
 
-  const taskInputHandler = enteredText => {
-    setNewTask(enteredText)
+  const addInputHandler = (task) => {
+    console.log(task)
+      setTasks(currentTasks => [...currentTasks, {key: Math.random().toString(), value: task}])
+      setIsAddMode(false)
+    };
+
+  const deleteTask = (taskID) => {
+    setTasks( currentTasks => {
+      return currentTasks.filter((task) => task.key !== taskID )
+    })
   }
-
-  const addInputHandler = () => {
-    setTasks(currentTasks => [...currentTasks, {key: Math.random().toString(), value: newTask}])
-  };
+  
+  const cancelInput = (params) => {
+    setIsAddMode(false);
+  }
+  
+  
   return (
     <View style={styles.container}>
-  <View
-  style={styles.inputContainer}
-  >
-    <TextInput 
-      placeholder="Enter new task" 
-      style={styles.textInput}
-      onChangeText={taskInputHandler}
-      value = {newTask}
-    />
-    <Button title="ADD" style={styles.button} onPress={addInputHandler}/>
-      </View>
+      <Button title="Add New Task" onPress={() => setIsAddMode(true)}/>
+      {/**
+       *  INPUT FIELD
+      */}
+      <TaskInput
+      isAddMode={isAddMode}
+      addInputHandler={addInputHandler}
+      cancelInputHandler={cancelInput}
+      />
+      
       {//<ScrollView>
 }
       <FlatList
@@ -33,9 +45,12 @@ export default function App() {
       }}
       data={tasks} 
       renderItem={itemData => 
-        <View style={styles.listItem}>
-        <Text>{itemData.item.value}</Text>
-        </View>}>
+        <TaskItem 
+        id={itemData.item.key} 
+        onDelete={deleteTask} 
+        title={itemData.item.value}
+        />
+        }>
       </FlatList>
 
 {//</ScrollView>
@@ -47,26 +62,5 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     padding: 50,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  textInput: {
-    borderColor:'black',
-    borderWidth: 0.8,
-    width: '80%',
-    padding: 10
-  },
-  button: {
-    marginTop: 30
-  },
-  listItem:{
-    padding: 10,
-    marginVertical: 10,
-    backgroundColor:'#ccc',
-    borderColor: 'black',
-    borderWidth: 1
   },
 });
